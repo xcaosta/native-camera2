@@ -166,6 +166,7 @@ static void closeCamera(void)
     LOGI("Close Camera\n");
 }
 
+extern "C"
 JNIEXPORT void JNICALL Java_org_freedesktop_nativecamera2_NativeCamera2_startPreview(JNIEnv *env,
                                                                                      jclass clazz,
                                                                                      jobject surface) {
@@ -188,6 +189,7 @@ JNIEXPORT void JNICALL Java_org_freedesktop_nativecamera2_NativeCamera2_startPre
 
 }
 
+extern "C"
 JNIEXPORT void JNICALL Java_org_freedesktop_nativecamera2_NativeCamera2_stopPreview(JNIEnv *env,
                                                                                     jclass clazz) {
     closeCamera();
@@ -202,6 +204,7 @@ static ACaptureRequest *extraViewCaptureRequest;
 static ACameraOutputTarget *extraViewOutputTarget;
 static ACaptureSessionOutput *extraViewSessionOutput;
 
+extern "C"
 JNIEXPORT void JNICALL Java_org_freedesktop_nativecamera2_NativeCamera2_startExtraView(JNIEnv *env,
                                                                                        jclass clazz,
                                                                                        jobject surface) {
@@ -235,6 +238,7 @@ JNIEXPORT void JNICALL Java_org_freedesktop_nativecamera2_NativeCamera2_startExt
     ACameraCaptureSession_setRepeatingRequest(captureSession, NULL, 2, requests, NULL);
 }
 
+extern "C"
 JNIEXPORT void JNICALL Java_org_freedesktop_nativecamera2_NativeCamera2_stopExtraView(JNIEnv *env,
                                                                                       jclass clazz) {
 

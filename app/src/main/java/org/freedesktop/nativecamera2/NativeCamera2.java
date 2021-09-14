@@ -20,8 +20,10 @@ import android.Manifest;
 import android.app.Activity;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
+
+import androidx.annotation.NonNull;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Surface;
@@ -35,14 +37,6 @@ public class NativeCamera2 extends Activity {
     static final String TAG = "NativeCamera2";
 
     private static final int PERMISSION_REQUEST_CAMERA = 1;
-
-    public static native void startPreview(Surface surface);
-
-    public static native void stopPreview();
-
-    public static native void startExtraView(Surface surface);
-
-    public static native void stopExtraView();
 
     LayoutInflater extraViewLayoutInflater = null;
 
@@ -63,22 +57,18 @@ public class NativeCamera2 extends Activity {
         super.onCreate(icicle);
         setContentView(R.layout.main);
 
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+        requestPermissions(Manifest.permission.CAMERA,
+                Manifest.permission.READ_EXTERNAL_STORAGE,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE);
+    }
 
-            ActivityCompat.requestPermissions(
-                    this,
-                    new String[] { Manifest.permission.CAMERA },
-                    PERMISSION_REQUEST_CAMERA);
-            return;
-        }
-
+    private void startWork() {
         surfaceView = (SurfaceView) findViewById(R.id.surfaceview);
         surfaceHolder = surfaceView.getHolder();
 
         surfaceHolder.addCallback(new SurfaceHolder.Callback() {
             @Override
             public void surfaceCreated(SurfaceHolder holder) {
-
                 Log.v(TAG, "surface created.");
                 startPreview(holder.getSurface());
             }
@@ -112,12 +102,10 @@ public class NativeCamera2 extends Activity {
             @Override
             public void surfaceCreated(SurfaceHolder holder) {
                 startExtraView(extraViewHolder.getSurface());
-
             }
 
             @Override
             public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-
             }
 
             @Override
@@ -140,11 +128,43 @@ public class NativeCamera2 extends Activity {
         });
     }
 
+    protected void requestPermissions(String... permissions) {
+        if (!hasPermissions(permissions)) {
+            requestPermissions(permissions, PERMISSION_REQUEST_CAMERA);
+        } else {
+            startWork();
+        }
+    }
+
+    protected boolean hasPermissions(String... permissions) {
+        if (permissions != null) {
+            for (String permission : permissions) {
+                if (ActivityCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
     @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        for(int r : grantResults) {
+            if (r != PackageManager.PERMISSION_GRANTED) {
+                return;
+            }
+        }
+        startWork();
+    }
+
+        @Override
     protected void onDestroy() {
         stopPreview();
         super.onDestroy();
     }
 
-
+    public static native void startPreview(Surface surface);
+    public static native void stopPreview();
+    public static native void startExtraView(Surface surface);
+    public static native void stopExtraView();
 }
